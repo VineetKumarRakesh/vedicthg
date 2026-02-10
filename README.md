@@ -1,13 +1,13 @@
-# VedicTHG
+# VedicTHG: Symbolic Vedic Computation for Low-Resource Talking-Head Generation in Educational Avatars
 
-**VedicTHG** is a lightweight, *bring-your-own-assets* toolkit for **audio-driven talking-head generation**.
-It turns an input audio clip into a sequence of visemes (mouth shapes) and renders a lip-synced video by
-compositing mouth sprites onto a reference face image (optionally with simple motion/rigging).
+**VedicTHG** is a lightweight, *bring-your-own-assets* toolkit for **audio-driven talking-head generation**.  
+It converts an input audio clip into a sequence of visemes (mouth shapes) and renders a lip-synced video by compositing mouth sprites onto a reference face image (optionally with simple motion/rigging).
 
-This repository is **GitHub-ready** and intentionally ships **no datasets** and **no personal face media**.
-You provide your own assets (with consent) or generate the included dummy assets for testing.
+This repository is **GitHub-ready** and intentionally ships **no datasets** and **no personal face media**.  
+You bring your own assets (with consent) — we bring the pipeline (and zero awkward copyright problems).
 
-Project page: https://vineetkumarrakesh.github.io/vedicthg/
+Project page: https://vineetkumarrakesh.github.io/vedicthg/  
+Preprint: https://doi.org/10.48550/arXiv.2602.08775
 
 ## What’s included
 
@@ -22,11 +22,10 @@ Project page: https://vineetkumarrakesh.github.io/vedicthg/
 1. **Audio processing**: load audio, optional MFCC extraction.
 2. **Phoneme alignment**: decode an approximate phoneme sequence and timings.
 3. **Viseme synthesis**: map phonemes to discrete viseme IDs and blend with overlap for smoothness.
-4. **Rendering**: for each frame, select/blend a mouth sprite, warp/compose it into the mouth region,
-   and write the video with the original audio.
+4. **Rendering**: for each frame, select/blend a mouth sprite, warp/compose it into the mouth region, and write the video with the original audio.
 
-> Note: This repo provides a reproducible **engineering pipeline**. It does **not** include or redistribute
-> any copyrighted datasets (GRID/LRS/VoxCeleb/etc.).
+> Note: This repo provides a reproducible **engineering pipeline**. It does **not** include or redistribute any copyrighted datasets (GRID/LRS/VoxCeleb/etc.).  
+> In other words: the code is free, the datasets are not, and your future self will thank you.
 
 ## Install
 
@@ -59,7 +58,7 @@ pip install -e .
 
 ## Quickstart demo (no datasets)
 
-1) Generate dummy assets (safe, synthetic):
+1) Generate dummy assets (safe, synthetic, and guaranteed to not sue you):
 
 ```bash
 python scripts/prepare_dummy_assets.py
@@ -87,7 +86,9 @@ python -m vedicthg.demo --audio data/raw/benchmark/clip_01.wav --face data/raw/a
 
 ## Bring your own assets
 
-**You must have permission/consent for any face media you use.**
+**You must have permission/consent for any face media you use.**  
+If it’s not yours (or you don’t have explicit permission), don’t use it.  
+VedicTHG is powerful — but not powerful enough to defeat ethics (or the law).
 
 Minimum inputs:
 
@@ -148,8 +149,7 @@ VedicTHG/
 
 ## Responsible use
 
-This project can create realistic-looking talking head videos when paired with suitable assets.
-Please use it responsibly:
+This project can create realistic-looking talking head videos when paired with suitable assets. Please use it responsibly:
 
 - Use only face media you own or have explicit permission to use.
 - Clearly label synthetic media when shared publicly.
@@ -157,19 +157,22 @@ Please use it responsibly:
 
 ## Citation
 
-If you use VedicTHG in academic work, please cite:
+If you use VedicTHG in academic work, please cite the preprint:
 
 ```bibtex
-@software{rakesh_vedicthg_2026,
-  author  = {Vineet Kumar Rakesh},
-  title   = {VedicTHG: Bring-your-own-assets audio-driven talking-head generation toolkit},
-  year    = {2026},
-  version = {0.1.0},
-  url     = {https://vineetkumarrakesh.github.io/vedicthg/}
+@misc{rakesh2026vedicthgsymbolicvediccomputation,
+      title={VedicTHG: Symbolic Vedic Computation for Low-Resource Talking-Head Generation in Educational Avatars}, 
+      author={Vineet Kumar Rakesh and Ahana Bhattacharjee and Soumya Mazumdar and Tapas Samanta and Hemendra Kumar Pandey and Amitabha Das and Sarbajit Pal},
+      year={2026},
+      eprint={2602.08775},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2602.08775}, 
 }
 ```
 
 See also: `CITATION.cff`.
 
 ---
-**No datasets included. Bring your own assets.**
+**No datasets included. Bring your own assets.**  
+(We provide the code; you provide the consent. Everyone wins.)
