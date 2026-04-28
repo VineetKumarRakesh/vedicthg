@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VedAI - Soumya Mazumdar</title>
+  <link rel="icon" type="image/png" href="/static/assets/Signature.png" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
+  <style>
+  /* ── topbar icon btn ─── */
+  .topbar-icon-btn{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--border-default);border-radius:7px;background:none;color:var(--text-tertiary);cursor:pointer;transition:all .12s;margin-left:6px}
+  .topbar-icon-btn:hover{border-color:var(--border-strong);color:var(--text-primary);background:var(--bg-elevated)}
+  /* ── doc chips ─── */
+  .doc-chips-bar{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex:1;min-width:0;margin:0 8px}
+  .doc-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;background:var(--bg-elevated);border:1px solid var(--border-default);font-size:11px;color:var(--text-secondary);font-family:var(--font-mono);white-space:nowrap}
+  .doc-chip-x{cursor:pointer;color:var(--text-tertiary);padding:0 2px;transition:color .12s;line-height:1}
+  .doc-chip-x:hover{color:var(--danger)}
+  /* ── upload doc button — yellow like send ─── */
+  .doc-upload-label{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:8px;background:linear-gradient(135deg,hsl(38,88%,62%),hsl(30,88%,55%));color:#0a0a0a;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap;border:none;font-family:var(--font-sans)}
+  .doc-upload-label:hover{opacity:.85}
+  /* ── upload inline status ─── */
+  .upload-status-inline{font-size:11px;padding:3px 8px;border-radius:5px;display:none;font-family:var(--font-mono)}
+  .upload-status-inline.busy{color:var(--text-tertiary)}
+  .upload-status-inline.ok{color:#1d9e75}
+  .upload-status-inline.err{color:var(--danger)}
+  /* ── composer hint — centred ─── */
+  .composer-actions{display:flex;align-items:center;justify-content:space-between;padding:6px 12px 10px 12px}
+  .composer-center{flex:1;display:flex;justify-content:center}
+  .hint{font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono)}
+  /* msg-actions styles are in style.css */
+  /* ── share toast ─── */
+  .share-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--text-primary);display:none;z-index:200;align-items:center;gap:10px;max-width:92vw}
+  .share-toast.show{display:flex}
+  .share-toast a{color:var(--accent);font-family:var(--font-mono);font-size:11px;word-break:break-all}
+  .share-toast-close{background:none;border:none;color:var(--text-tertiary);cursor:pointer;padding:2px 6px;font-size:15px;line-height:1}
+  /* ── KaTeX dark theme ─── */
+  .katex{font-size:1em!important}
+  .katex-display{overflow-x:auto;padding:6px 0}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="brand-simple">
+          <img class="brand-logo" src="/static/assets/Signature.png" alt="VedAI logo" />
+          <div><h1>VedAI</h1><p>vedai.soumyamazumdar.com/</p></div>
+        </div>
+        <button class="new-chat-btn" id="newChatBtn">New conversation</button>
+        <button class="temp-chat-btn" id="tempChatBtn" title="Temporary chat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Temporary chat
+        </button>
+        <div class="section-label">Recent</div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="footer-card">
+          <div class="footer-title">Site</div>
+          <div class="footer-value">www.soumyamazumdar.com</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <div class="temp-banner" id="tempBanner" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Temporary chat — this conversation won't be saved to history
+      </div>
+
+      <header class="topbar">
+        <div class="topbar-brand">
+          <img class="topbar-logo" src="/static/assets/Signature.png" alt="VedAI" />
+          <div class="topbar-title">VedAI</div>
+        </div>
+        <div class="doc-chips-bar" id="docChipsBar"></div>
+        <div style="display:flex;align-items:center">
+          <div class="status-pill" id="statusPill">Ready</div>
+          <!-- Share only — no settings button -->
+          <button class="topbar-icon-btn" id="shareBtn" title="Share conversation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="chat-scroll" id="chatScroll">
+        <div class="welcome-card" id="welcomeCard">
+          <h2>Hello, I'm <span>VedAI</span></h2>
+          <p>Ask questions, fix code errors, improve writing, draft emails, and compose letters — all in one place.</p>
+          <div class="welcome-chips" id="welcomeChips">
+            <button class="chip" data-prompt="Explain how async/await works in JavaScript">Explain async/await</button>
+            <button class="chip" data-prompt="Fix this code and tell me what was wrong:&#10;">Fix my code</button>
+            <button class="chip" data-prompt="Improve the tone and clarity of this text:&#10;">Improve my writing</button>
+            <button class="chip" data-prompt="Draft a professional follow-up email to ">Draft an email</button>
+            <button class="chip" data-prompt="Write a formal letter for ">Write a letter</button>
+          </div>
+        </div>
+        <div class="messages" id="messages"></div>
+      </section>
+
+      <footer class="composer-shell">
+        <div class="composer">
+          <textarea id="messageInput" placeholder="Message VedAI…" rows="1"></textarea>
+          <div class="composer-actions">
+            <!-- Left: upload -->
+            <label class="doc-upload-label" for="docFileInput">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+            </label>
+            <input type="file" id="docFileInput" accept=".pdf,.docx,.doc,.pptx,.ppt,.txt,.md,.jpg,.jpeg,.png,.gif,.webp" style="display:none"/>
+            <span id="uploadStatus" class="upload-status-inline"></span>
+            <!-- Centre: hint -->
+            <div class="composer-center">
+              <span class="hint">↵ send &nbsp;·&nbsp; ⇧↵ newline</span>
+            </div>
+            <!-- Right: send -->
+            <button id="sendBtn" class="send-btn">
+              Send
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-backdrop" id="renameBackdrop">
+    <div class="modal">
+      <div class="modal-title">Rename conversation</div>
+      <input class="modal-input" id="renameInput" type="text" placeholder="Enter new name…" maxlength="80" />
+      <div class="modal-actions">
+        <button class="modal-btn modal-cancel" id="renameCancelBtn">Cancel</button>
+        <button class="modal-btn modal-confirm" id="renameConfirmBtn">Rename</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="deleteBackdrop">
+    <div class="modal">
+      <div class="modal-title">Delete conversation?</div>
+      <p class="modal-body">This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="modal-btn modal-delete" id="deleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share toast -->
+  <div class="share-toast" id="shareToast">
+    <span>Link copied!</span>
+    <a id="shareLink" href="#" target="_blank"></a>
+    <button class="share-toast-close" id="shareToastClose">✕</button>
+  </div>
+
+  <!-- KaTeX sync-loaded before script.js so renderMathInElement is always ready -->
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="/static/script.js"></script>
+</body>
+</html>
